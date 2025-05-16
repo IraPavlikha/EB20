@@ -1,0 +1,58 @@
+У деяких видах спортивних змагань виступ кожного спортсмена незалежно оцінюється кількома суддями, потім із усієї сукупності оцінок видаляється одна найбільш висока і одна найбільш низька, а для оцінок, що лишилися, обчислюється середнє арифметичне, котре і йде в залік спортсмену. Створити програму, яка повинна виконувати наступні функції: 
+1.	Вводити дані про спортсмена до складу яких входять: - прізвище, - оцінки, які виставлені 5-ма суддями.  
+2.	Розраховувати сумарну оцінку спортсмена і записати дані про спортсмена в файл. 
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+
+using namespace std;
+
+struct Sportsman {
+    string surname;
+    vector<double> scores;
+    double finalScore;
+};
+
+// Функція для обчислення середньої оцінки після видалення макс і мін
+double calculateAverageScore(vector<double> scores) {
+    if (scores.size() < 5) return 0;
+
+    sort(scores.begin(), scores.end());
+    // Видаляємо мінімальну і максимальну оцінку
+    scores.erase(scores.begin()); // мінімальна
+    scores.pop_back();            // максимальна
+
+    double sum = 0;
+    for (double score : scores) {
+        sum += score;
+    }
+    return sum / scores.size(); // середнє з 3-х оцінок
+}
+
+int main() {
+    Sportsman s;
+    cout << "Введіть прізвище спортсмена: ";
+    getline(cin, s.surname);
+
+    cout << "Введіть 5 оцінок від суддів (через пробіл): ";
+    s.scores.resize(5);
+    for (int i = 0; i < 5; ++i) {
+        cin >> s.scores[i];
+    }
+
+    s.finalScore = calculateAverageScore(s.scores);
+
+    ofstream outFile("sportsmen.txt", ios::app); // дозапис
+    if (outFile.is_open()) {
+        outFile << s.surname << " - середня оцінка: " << fixed << setprecision(2) << s.finalScore << endl;
+        outFile.close();
+        cout << "Дані збережено у файл 'sportsmen.txt'" << endl;
+    } else {
+        cout << "Не вдалося відкрити файл для запису." << endl;
+    }
+
+    return 0;
+}
